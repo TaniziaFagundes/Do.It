@@ -1,13 +1,15 @@
 import { Container, Content, Background, AnimationContainer } from "./styles";
-import { Link } from "react-router-dom";
+import { Link, useHistory, Redirect } from "react-router-dom";
 import { FiUser, FiLock } from "react-icons/fi";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import API from "../../services/api";
+import { toast } from "react-toastify";
 
-const Login = () => {
+const Login = ({ authenticated, setAuthenticated }) => {
   const schema = yup.object().shape({
     email: yup.string().email("Formato invalido").required("Campo obrigatório"),
     password: yup.string().required("Campo obrigatório"),
@@ -19,9 +21,26 @@ const Login = () => {
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
-  const onSubmitChange = (data) => {
-    console.log(data);
+  const history = useHistory();
+  const onSubmitChange = ({ email, password }) => {
+    const user = { email, password };
+    API.post("/user/login", user)
+      .then((response) => {
+        const { token, user } = response.data;
+
+        localStorage.setItem("@Doit:token", JSON.stringify(token));
+        localStorage.setItem("@Doit:user", JSON.stringify(user));
+        setAuthenticated(true);
+
+        toast.success("🦄 Oi " + user.name + "!!");
+        return history.push("/dashboard");
+      })
+      .catch((error) => toast.error("Email ou senha inválidos!"));
   };
+
+  if (authenticated) {
+    return <Redirect to="/dashboard" />;
+  }
 
   return (
     <Container>
