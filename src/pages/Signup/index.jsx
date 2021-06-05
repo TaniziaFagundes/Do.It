@@ -1,12 +1,13 @@
 import { Background, Container, Content, AnimationContainer } from "./styles";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import API from "../../services/api";
+import { toast } from "react-toastify";
 const Signup = () => {
   const schema = yup.object().shape({
     name: yup.string().required("Campo Obrigatório!"),
@@ -30,10 +31,16 @@ const Signup = () => {
     formState: { errors },
   } = useForm({ resolver: yupResolver(schema) });
 
-  console.log(errors);
+  const history = useHistory();
 
-  const onSubmitFunction = (data) => {
-    console.log(data);
+  const onSubmitFunction = ({ name, email, password }) => {
+    const user = { name, email, password };
+    API.post("/user/register", user)
+      .then((response) => {
+        toast.success("Cadatro Realizado!");
+        return history.push("/login");
+      })
+      .catch((error) => toast.error("Verifique os dados inseridos!"));
   };
 
   return (
