@@ -1,6 +1,6 @@
 import { Container, InputContainer } from "./styles";
 
-const Input = ({ register, name, error, label, icon: Icon, ...rest }) => {
+const Input = ({ register, name, error = "", label, icon: Icon, ...rest }) => {
   return (
     <Container>
       <div>
